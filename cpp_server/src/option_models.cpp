@@ -13,7 +13,7 @@ double OptionModel::blackScholes(double S, double K, double r, double sigma, dou
 
 // Calculate cumulative distribution function (CDF) of standard normal distribution
 double OptionModel::cdf(double x) {
-    return 0.0;
+return 0.5 * (1 + erf(x / sqrt(2)));
 }
 
 // Binomial model
