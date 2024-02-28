@@ -23,12 +23,38 @@ double OptionModel::blackScholes(double S, double K, double r, double sigma, dou
 
 // Calculate cumulative distribution function (CDF) of standard normal distribution
 double OptionModel::cdf(double x) {
-return 0.5 * (1 + erf(x / sqrt(2)));
+    return 0.5 * (1 + erf(x / sqrt(2)));
 }
 
 // Binomial model
 double OptionModel::binomial(double S, double K, double r, double sigma, double T, int steps, char type) {
-    return 0.0;
+    double dt = T / steps;
+    double u = exp(sigma * sqrt(dt));
+    double d = 1 / u;
+    double p = (exp(r * dt) - d) / (u - d);
+
+    double prices[steps + 1];
+    prices[0] = S * pow(d, steps);
+
+    for (int i = 1; i <= steps; ++i) {
+        prices[i] = prices[i - 1] * u / d;
+    }
+
+    double optionPrices[steps + 1];
+    for (int i = 0; i <= steps; ++i) {
+        if (type == 'C')
+            optionPrices[i] = fmax(0, prices[i] - K);
+        else
+            optionPrices[i] = fmax(0, K - prices[i]);
+    }
+
+    for (int j = steps - 1; j >= 0; --j) {
+        for (int i = 0; i <= j; ++i) {
+            optionPrices[i] = exp(-r * dt) * (p * optionPrices[i + 1] + (1 - p) * optionPrices[i]);
+        }
+    }
+
+    return optionPrices[0];
 }
 
 // Monte Carlo simulation
