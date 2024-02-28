@@ -8,7 +8,17 @@ OptionModel::~OptionModel() {
 
 // Black-Scholes model
 double OptionModel::blackScholes(double S, double K, double r, double sigma, double T, char type) {
-    return 0.0;
+    double d1 = (log(S / K) + (r + 0.5 * pow(sigma, 2)) * T) / (sigma * sqrt(T));
+    double d2 = d1 - sigma * sqrt(T);
+
+    if (type == 'c') { // Call option
+        return S * cdf(d1) - K * exp(-r * T) * cdf(d2);
+    } else if (type == 'p') { // Put option
+        return K * exp(-r * T) * cdf(-d2) - S * cdf(-d1);
+    } else {
+        std::cerr << "Invalid option type" << std::endl;
+        return 0.0;
+    }
 }
 
 // Calculate cumulative distribution function (CDF) of standard normal distribution
