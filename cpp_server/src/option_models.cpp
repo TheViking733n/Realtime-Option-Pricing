@@ -59,7 +59,20 @@ double OptionModel::binomial(double S, double K, double r, double sigma, double 
 
 // Monte Carlo simulation
 double OptionModel::monteCarlo(double S, double K, double r, double sigma, double T, int simulations, char type) {
-    return 0.0;
+    srand(time(0));
+    double dt = T;
+    double sum = 0.0;
+
+    for (int i = 0; i < simulations; ++i) {
+        double gaussian = rand() / (RAND_MAX + 1.0);
+        double random = sqrt(-2.0 * log(gaussian)) * cos(2 * M_PI * rand() / (RAND_MAX + 1.0));
+        double ST = S * exp((r - 0.5 * sigma * sigma) * dt + sigma * sqrt(dt) * random);
+
+        double payoff = (type == 'C') ? fmax(ST - K, 0) : fmax(K - ST, 0);
+        sum += payoff;
+    }
+
+    return (sum / simulations) * exp(-r * T);
 }
 
 // Calculate option Greeks (Delta, Gamma, Theta, Vega, Rho)
