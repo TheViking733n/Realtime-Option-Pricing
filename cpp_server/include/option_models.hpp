@@ -13,5 +13,7 @@ public:
     
     double monteCarlo(double S, double K, double r, double sigma, double T, int simulations, char type);
     
+    double cumulativeDistributionFunction(double x);
+    
     void calculateGreeks(double S, double K, double r, double sigma, double T, double &delta, double &gamma, double &theta, double &vega, double &rho, char type);
 };

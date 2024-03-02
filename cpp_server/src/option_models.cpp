@@ -75,6 +75,36 @@ double OptionModel::monteCarlo(double S, double K, double r, double sigma, doubl
     return (sum / simulations) * exp(-r * T);
 }
 
+double OptionModel::cumulativeDistributionFunction(double x) {
+    const double a1 = 0.31938153;
+    const double a2 = -0.356563782;
+    const double a3 = 1.781477937;
+    const double a4 = -1.821255978;
+    const double a5 = 1.330274429;
+    const double gamma = 0.2316419;
+
+    double L = fabs(x);
+    double k = 1.0 / (1.0 + gamma * L);
+    double w = (((((a5 * k + a4) * k) + a3) * k + a2) * k + a1) * k;
+    double y = 1.0 - (1.0 / (sqrt(2 * M_PI)) * exp(-L * L / 2.0) * w);
+
+    if (x < 0.0)
+        y = 1.0 - y;
+
+    return y;
+}
+
+
 // Calculate option Greeks (Delta, Gamma, Theta, Vega, Rho)
 void OptionModel::calculateGreeks(double S, double K, double r, double sigma, double T, double &delta, double &gamma, double &theta, double &vega, double &rho, char type) {
+    double d1 = (log(S / K) + (r + 0.5 * sigma * sigma) * T) / (sigma * sqrt(T));
+    double d2 = d1 - sigma * sqrt(T);
+    double N_d1 = cumulativeDistributionFunction(d1);
+    double N_d2 = cumulativeDistributionFunction(d2);
+
+    delta = (type == 'C') ? N_d1 : N_d1 - 1;
+    gamma = exp(-d1 * d1 * 0.5 - 0.5 * log(2 * M_PI)) / (S * sigma * sqrt(T));
+    theta = -((S * sigma * exp(-0.5 * d1 * d1) / (2 * sqrt(T))) / sqrt(2 * M_PI * T));
+    vega = S * sqrt(T) * exp(-d1 * d1 * 0.5 - 0.5 * log(2 * M_PI)) / 100;
+    rho = (type == 'C') ? T * K * exp(-r * T) * N_d2 / 100 : -T * K * exp(-r * T) * (1 - N_d2) / 100;
 }
