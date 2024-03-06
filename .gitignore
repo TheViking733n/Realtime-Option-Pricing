@@ -2,4 +2,7 @@
 .DS_Store
 
 # Ignore .out files
-/**/*.out
+**/*.out
+
+# Ignore .vscode files
+.vscode/
